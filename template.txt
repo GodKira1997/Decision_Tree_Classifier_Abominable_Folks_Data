@@ -1,0 +1,130 @@
+"""
+file: HW_06_Classifier_Kallurwar.py
+description:
+language: python3
+author: Anurag Kallurwar, ak6491@rit.edu
+"""
+
+import warnings
+import sys
+import os
+import math
+import numpy as np
+import pandas as pd
+
+
+# CONSTANTS
+PREDICTION = 'ClassID'
+PREDICTION2 = 'ClassName'
+CLASSIFICATION_OUTPUT_FILE = "HW_06_Kallurwar_MyClassifications.csv"
+
+
+def clean_data(df: pd.DataFrame):
+\t"""
+\tCleaning the dataframe
+\t:param df: input dataframe
+\t:return: cleaned dataframe
+\t"""
+\treturn df.dropna()
+
+
+def read_file(file_name: str):
+\t"""
+\tRead the CSV file and return dataframe
+\t:param thread_index: Index of thread
+\t:param file_paths: filename
+\t:return: dataframe
+\t"""
+\tprint("Reading file: " + file_name)
+\t# Skipping first line containing "HEADER" string
+\tdataframe = pd.read_csv(file_name, low_memory=False)
+\tdataframe = clean_data(dataframe)
+\treturn dataframe
+
+
+def classify(input_df: pd.DataFrame):
+\t"""
+\tThis is the resultant classifer of the decision tree which classifies the
+\tgiven input
+\t:param input_df:
+\t:return:
+\t"""
+\tattributes = input_df.columns.tolist()
+\tlines = [','.join(attributes + [PREDICTION2, PREDICTION]) + "\n"]
+\tfor index, row in input_df.iterrows():
+\t\trow_dictionary = dict()
+\t\tfor index in range(len(attributes)):
+\t\t\trow_dictionary[attributes[index]] = row[index]
+\t\t#START
+\t\t#END
+\t\tclass_value = "Assam"
+\t\tif class_label == 1:
+\t\t\tclass_value = "Bhuttan"
+\t\tprint(class_label, class_value)
+\t\tlines += [",".join(map(str, row)) + "," + str(class_value) + "," + str(class_label) + "\n"]
+\treturn lines
+
+
+def write_output(ouput: str):
+\t"""
+\tCreates a CSV output file
+\t:param decision_tree: Decision Tree
+\t:return: None
+\t"""
+\twith open(CLASSIFICATION_OUTPUT_FILE, 'w') as file:
+\t\tfile.writelines(ouput)
+
+
+def process(abonimable_df: pd.DataFrame):
+\t"""
+\tThis function compute features and predictions the classID for the input data
+\t:param abonimable_df: Input data
+\t:return: None
+\t"""
+\t# Part 1.
+\t# Quantize Data
+\tprint("\n\n===== Quantizing Data =====")
+\t# Quantizing Age to nearest 1 years
+\tabonimable_df['Age'] = abonimable_df['Age'].round(0)
+\t# Quantizing Ht to nearest 1 cm
+\tabonimable_df['Ht'] = abonimable_df['Ht'].round(0)
+\t# Quantizing anything else to nearest 1/2 value
+\tcolumns_to_be_quantized = ['TailLn', 'BangLn', 'HairLn', 'Reach']
+\t# For every value in the above columns is being rounded
+\tabonimable_df = abonimable_df.apply(lambda value: (round(value * 2) / 2)
+\tif value.name in columns_to_be_quantized else value)
+
+\t# Part 2
+\t# Feature Generation
+\tabonimable_df['Shagginess'] = abonimable_df['HairLn'] - abonimable_df['BangLn']
+\tabonimable_df['ApeFactor'] = abonimable_df['Reach'] - abonimable_df['Ht']
+\tprint(abonimable_df)
+
+\t# Part 3.
+\t# Classification for input data
+\tprint("\n\n===== CLASSIFICATION =====")
+\tlines = classify(abonimable_df)
+\tprint("\nWriting output to " + CLASSIFICATION_OUTPUT_FILE)
+\twrite_output(lines)
+
+
+def main():
+\t"""
+\tThe main function
+\t:return: None
+\t"""
+\twarnings.simplefilter(action='ignore', category=FutureWarning)
+\tif len(sys.argv) < 2:
+\t\tprint("Missing Argument!")
+\t\tprint("Usage: HW_06_Classifier_Kallurwar.py <filename.csv>")
+\t\treturn
+\tfile_name = sys.argv[1].strip()
+\tif not os.path.isfile(os.getcwd() + "\\" + file_name):
+\t\tprint("Please put " + file_name + " in the execution folder!")
+\t\treturn
+\tabonimable_df = read_file(file_name)
+\tprocess(abonimable_df)
+
+
+if __name__ == '__main__':
+\tmain()  # Calling Main Function
